@@ -86,16 +86,14 @@ CREATE TABLE Role (
 );
 
 CREATE TABLE Officer (
-    cnic VARCHAR(13) PRIMARY KEY,  
+    cnic VARCHAR(13) PRIMARY KEY,
     employee_id VARCHAR(20) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE,
     phone_number VARCHAR(20),
     address_id INT NOT NULL,
     branch_id INT NOT NULL,
     role_id INT NOT NULL,
     joining_date DATE NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    password_hash VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (cnic) REFERENCES Person(cnic),
     FOREIGN KEY (address_id) REFERENCES Address(address_id),
@@ -117,7 +115,7 @@ CREATE TABLE Application (
     application_id INT PRIMARY KEY AUTO_INCREMENT,
     citizen_cnic VARCHAR(13) NOT NULL,
     application_type ENUM('new', 'renewal', 'replacement', 'correction') NOT NULL,
-    assigned_officer_cnic VARCHAR(13) NULL,  -- Changed to VARCHAR(13)
+    assigned_officer_cnic VARCHAR(13) NULL,
     status ENUM('pending', 'processing', 'approved', 'rejected') DEFAULT 'pending',
     submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     processed_at DATETIME NULL,
@@ -132,9 +130,9 @@ CREATE TABLE Payment (
     payment_method ENUM('cash', 'debit_card', 'bank_transfer') NOT NULL,
     payment_status ENUM('pending', 'completed', 'refunded') DEFAULT 'pending',
     paid_at DATETIME NULL,
-    received_by_cnic VARCHAR(13) NULL,  -- Changed to VARCHAR(13)
+    received_by_cnic VARCHAR(13) NULL, 
     FOREIGN KEY (application_id) REFERENCES Application(application_id),
-    FOREIGN KEY (received_by_cnic) REFERENCES Officer(cnic)  -- Fixed reference
+    FOREIGN KEY (received_by_cnic) REFERENCES Officer(cnic)
 );
 
 CREATE TABLE ID_Card (
@@ -204,3 +202,12 @@ LEFT JOIN Application a
 ON o.cnic = a.assigned_officer_cnic
 GROUP BY o.employee_id;
 
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('citizen','registration_officer','verification_officer','admin') NOT NULL,
+    cnic VARCHAR(13) NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cnic) REFERENCES Person(cnic)
+);
