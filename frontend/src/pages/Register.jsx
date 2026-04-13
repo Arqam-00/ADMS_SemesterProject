@@ -37,25 +37,37 @@ const Register = () => {
       return;
     }
     
-    if (formData.cnic.length !== 13) {
-      toast.error('CNIC must be exactly 13 digits');
+    // Only validate CNIC length if user entered one
+    if (formData.cnic && formData.cnic.length !== 13) {
+      toast.error('CNIC must be exactly 13 digits (or leave blank for auto-assignment)');
       return;
     }
     
     setLoading(true);
     
     try {
-      await api.post('/api/v1/auth/register', {
+      const requestData = {
         email: formData.email,
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name,
         gender: formData.gender,
-        date_of_birth: formData.date_of_birth,
-        cnic: formData.cnic
-      });
+        date_of_birth: formData.date_of_birth
+      };
       
-      toast.success('Registration successful! Please login.');
+      // Only include CNIC if user entered one
+      if (formData.cnic) {
+        requestData.cnic = formData.cnic;
+      }
+      
+      const response = await api.post('/api/v1/auth/register', requestData);
+      
+      const autoAssigned = response.data.auto_assigned;
+      if (autoAssigned) {
+        toast.success(`Registration successful! Your CNIC (${response.data.cnic}) has been auto-assigned. Please login.`);
+      } else {
+        toast.success('Registration successful! Please login.');
+      }
       navigate('/login');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed');
@@ -99,18 +111,18 @@ const Register = () => {
           
           <div style={styles.formRow}>
             <div style={styles.formGroup}>
-              <label style={styles.label}>CNIC (13 digits) *</label>
+              <label style={styles.label}>CNIC (Optional)</label>
               <input
                 type="text"
                 name="cnic"
                 value={formData.cnic}
                 onChange={handleChange}
-                placeholder="3520112345678"
+                placeholder="Leave blank for auto-assignment"
                 style={styles.input}
                 maxLength="13"
                 pattern="[0-9]{13}"
-                required
               />
+              <p style={styles.hint}>13 digits or leave empty for auto-generation</p>
             </div>
             
             <div style={styles.formGroup}>
@@ -271,6 +283,11 @@ const styles = {
   link: {
     color: '#1a73e8',
     textDecoration: 'none',
+  },
+  hint: {
+    fontSize: '11px',
+    color: '#888',
+    marginTop: '5px',
   },
 };
 
