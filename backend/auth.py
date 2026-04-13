@@ -30,7 +30,7 @@ def create_token(user):
     payload = {
         "user_id": user["user_id"],
         "role": user["role"],
-        "cnic": user["CNIC"],
+        "cnic": user["cnic"],
         "exp": datetime.utcnow() + timedelta(minutes=120)
     }
 

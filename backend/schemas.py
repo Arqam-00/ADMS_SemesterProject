@@ -17,3 +17,6 @@ class PaymentCreate(BaseModel):
     application_id:int
     amount:float
     payment_method:str
+
+class ApplicationCreateWithCorrection(ApplicationCreate):
+    correction_details: str = None
